@@ -117,7 +117,6 @@ class OSMParser(object):
         """
         Build the osm file
         """
-        
         print 'Building'
 
         for way in self.ways:
