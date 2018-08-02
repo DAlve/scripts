@@ -1,0 +1,48 @@
+{
+    // vscode
+    "editor.detectIndentation": true,
+    "editor.formatOnPaste": true,
+    "editor.tabSize": 4,
+    "editor.insertSpaces": true,
+    "files.insertFinalNewline": true,
+
+    // only for python language files
+    "[python]": {
+        "editor.rulers": [
+            72,
+            79
+        ],
+        "editor.tabSize": 4,
+        "editor.insertSpaces": true
+    },
+
+    // pythonVSCode extension
+    "python.pythonPath": "C:\\Python27\\python.exe",
+    "python.linting.pylintEnabled": true,
+    "python.linting.flake8Enabled": false,
+    "python.linting.pep8Enabled": true,
+    "python.linting.pep8Args": ["--disable=E501"],
+    "python.linting.pylintArgs": ["--disable=C0103, E1111, C0301, C0303"],
+    "python.formatting.provider": "yapf",
+    "python.formatting.yapfArgs": ["--style", "{based_on_style: chromium, indent_width: 4}"],
+
+    // Python stuff
+    "python.autoComplete.preloadModules": [
+        "C:/Program Files/Autodesk/Maya2018/Python/Lib/site-packages",
+        "C:/Program Files/Autodesk/Maya2018/devkit/other/pymel/extras/completion/py"
+    ],
+    "python.autoComplete.extraPaths": [
+        "C:/Program Files/Autodesk/Maya2018/Python/Lib/site-packages",
+        "C:/Program Files/Autodesk/Maya2018/devkit/other/pymel/extras/completion/py"
+    ],
+
+    "terminal.integrated.shell.windows": "C:\\Windows\\System32\\cmd.exe",
+
+    "logViewer.watch": [
+        {
+            "title": "maya logs",
+            "pattern": "D:\\_dev\\maya_logs\\*.txt"
+        }
+    ]
+
+}
