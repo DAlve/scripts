@@ -1,13 +1,16 @@
 import re
+import math
+import random
 
 import xml.etree.cElementTree as ET
 from math import sin, cos, sqrt, atan2, radians
 
 import maya.cmds as cmds
 
-osmFile = "F:\Maya\home.osm"
 
-R = 6373.0
+osmFile = "F:\Maya\map.osm"
+
+R = 637300.0
 
 def latlong_distance(lat_long_1, lat_long_2):
     
@@ -119,11 +122,11 @@ class OSMParser(object):
         """
         print 'Building'
 
-        for way in self.ways:
-            print '###---------------------------###'
+        num_buildings = 0
 
+        for way in self.ways:
             if 'building' in way.tags:
-                print 'Found a building!'
+                #print 'Found a building!'
 
                 positions = []
 
@@ -132,7 +135,22 @@ class OSMParser(object):
                     pos_xy = self.get_relative_coordinates([float(node.lat), float(node.lon)])
                     positions.append((pos_xy[0], pos_xy[1], 0))
 
-                cmds.polyCreateFacet(p=positions)
+                building = cmds.polyCreateFacet(p=positions)
+
+                building_face = '{}.f[0]'.format(building[0])
+
+                building_scale = math.ceil(cmds.polyEvaluate(building_face, worldArea=True)/1000000)
+                if building_scale > 12:
+                    building_scale = 12
+
+                num_stories = math.floor(random.uniform(1, 3))*building_scale
+
+                height = 450 * num_stories
+
+                cmds.polyExtrudeFacet(building_face, kft=True, ltz=height)
+                num_buildings += 1
+        
+        print 'Build {} buildings!'.format(num_buildings)
                     
             
 
