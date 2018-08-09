@@ -12,6 +12,7 @@ osmFile = "F:\Maya\map.osm"
 
 R = 637300.0
 
+
 def latlong_distance(lat_long_1, lat_long_2):
     
     lat1 = radians(lat_long_1[0])
@@ -52,6 +53,7 @@ class OSMNode(object):
         
         return self
 
+
 class OSMWay(object):
 
     def __init__(self):
@@ -73,6 +75,7 @@ class OSMWay(object):
                 self.nodes.append(child.attrib['ref'])
 
         return self
+
 
 class OSMParser(object):
     """
@@ -97,7 +100,8 @@ class OSMParser(object):
         self.nodes = {}
         self.tagged_nodes = []
         self.tags = []
-    
+
+
     def get_size(self):
         """
         Get the length and height of the region for the osm
@@ -105,7 +109,8 @@ class OSMParser(object):
 
         self.length = latlong_distance([self.min_lat, self.min_long], [self.max_lat, self.min_long])
         self.height = latlong_distance([self.min_lat, self.min_long], [self.min_lat, self.max_long])
-    
+
+
     def get_relative_coordinates(self, lat_long):
         """
         Get the points relative coordinates
@@ -116,18 +121,54 @@ class OSMParser(object):
 
         return rel_lat, rel_lon
 
+
+    def get_centre_pos(self, positions):
+        """
+        Get the centre point of a list of positions
+        """
+
+        # get the length of the positions array
+        dims = len(positions)
+
+        # create empty arrays for each dimension
+        x_array = []
+        y_array = []
+        z_array = []
+
+        # for each position we want to split the axis into their arrays
+        for i in positions:
+            x_array.append(i[0])
+            y_array.append(i[1])
+            z_array.append(i[2])
+        
+        # find the average of each array
+        x = sum(x_array) / dims
+        y = sum(y_array) / dims
+        z = sum(z_array) / dims
+
+        return (x, y, z)
+
+
     def build(self):
         """
         Build the osm file
         """
         print 'Building'
 
+
+        # first get a group to put everything in
+        bld_group = '_buildings'
+
+        if not cmds.ls(bld_group):
+            cmds.group(empty=True, n=bld_group)
+
+        # create a something to store the number of the building we are on
         num_buildings = 0
 
+        # go through our ways and find the buildings
         for way in self.ways:
             if 'building' in way.tags:
-                #print 'Found a building!'
-
+                
                 positions = []
 
                 for node_id in way.nodes:
@@ -137,17 +178,18 @@ class OSMParser(object):
 
                 building = cmds.polyCreateFacet(p=positions)
 
-                building_face = '{}.f[0]'.format(building[0])
+                centre_pos = self.get_centre_pos(positions)
+                cmds.xform( building[0], ws=True, piv=centre_pos )
 
-                building_scale = math.ceil(cmds.polyEvaluate(building_face, worldArea=True)/1000000)
-                if building_scale > 12:
-                    building_scale = 12
+                # make sure all the vertices have the correct normals
+                for i in range(cmds.polyEvaluate(building[0], vertex=True)):
+                    cmds.select('{}.vtx[{}]'.format(building[0], i))
+                    cmds.polyNormalPerVertex(xyz=(0,0,1))
 
-                num_stories = math.floor(random.uniform(1, 3))*building_scale
 
-                height = 450 * num_stories
+                new_building = cmds.rename(building[0], 'building_{0:03d}'.format(num_buildings+1))
+                cmds.parent(new_building, bld_group)
 
-                cmds.polyExtrudeFacet(building_face, kft=True, ltz=height)
                 num_buildings += 1
         
         print 'Build {} buildings!'.format(num_buildings)
